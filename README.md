@@ -23,6 +23,3 @@ One of our challenges was overfitting the ResNets. This was mostly due to time l
 1. YOLOv5 Document: https://github.com/ultralytics/yolov5
 2. AI Camp Web Templates: https://github.com/organization-x/omni/tree/main/app
 3. Roboflow: https://roboflow.com/
-4. Solovyev, Roman, Weimin Wang, and Tatiana Gabruseva. "Weighted boxes fusion: Ensembling boxes from different object detection models." Image and Vision Computing 107 (2021): 104117. https://arxiv.org/abs/1910.13302
-5. Weighted Box Fusion, https://github.com/ZFTurbo/Weighted-Boxes-Fusion
-6. Norfair: https://github.com/tryolabs/norfair

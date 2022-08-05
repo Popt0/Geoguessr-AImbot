@@ -1,117 +1,77 @@
-# Computer Vision Web Scaffold
-A scaffold for deploying dockerized flask applications.
+# Geoguessr AImbot
+## Overview
+This project is implemented for AI Camp Summer Computer Vision. The **minimum viable product (MVP)** is to detect bollards, electricity poles in the images using YOLOv5. Geoguessr is a geographical website game where players guess the locations of Google street view images. We decided to make a Geoguessr AImbot because Geoguessr is very popular and there aren’t that many ways to cheat it. Our AI also has real-world applications. For example, it can be used to find a possible country where random images were taken if someone is curious.
 
-If you have any questions, feel free to open an issue on [Github](https://github.com/organization-x/omni/issues).
+## Dataset
+We downloaded Youtube videos of people playing Geogussr and extracted image frames once every thirty seconds. The images that contain signs, electricity poles, or bollards were kept and labeled using [roboflow](https://roboflow.com/) by everyone on the team. Our country specific datasets were created using Google street view API, where we gathered random urban and suburban location street view images and went through the same process on Roboflow. 
+You could find the data used for training, validation and testing in [data](data) directory. Our dataset contains xxx images. 
 
-### Video Guide
-[![Deploy a Web Project with Flask](https://img.youtube.com/vi/JUb-PpejA7w/0.jpg)](https://youtu.be/JUb-PpejA7w "Deploy a Web Project with Flask")
+![](image/label_generate.png)
 
-This guide covers how you can quickly deploy most projects with the [Flask](https://flask.palletsprojects.com/) framework and our omni scaffold.
+## Script
+1. [Kirby_Detection_ver2.ipynb](code/Kirby_Detection_ver2.ipynb)
 
-### Quickstart Guide for Local Development
+I ran this notebook on Google Colab. Based on YOLOv5s6, the model here was trained for 200 epochs with the default hyperparameter setting. You could find the running result in this notebook, as well as [result](result) directory. The [pdf](code/Kirby_Detection_ver2.pdf) version of this notebook is also available.
 
-First clone this repository through 
+2. [Kirby_Detection_Emsemble.ipynb](code/Kirby_Detection_Emsemble.ipynb)
 
-`https://github.com/organization-x/omni`
+To get a better performance, I trained both YOLOv5m6 and YOLOv5s6 model. Instead of using the inherited ensemble method in YOLO (NMS), I choose weighted box fusion, one of the state of art ensembling method for object detection. This notebook includs relative functions. Besides, some format transform functions (yolo, voc, coco) are also included for future use.
 
-cd into the `/app` folder
+## Result
+Kirby is marked by bounding box! The detailed train, validation, and testing results (including the evaluation metrics (PR, Precision, Recall etc., confusion matrix, and graphic output) are shown in [result](result) directory. After training, the recall is pretty high, almost equals to 1, while the precision is 80 % approximately. It means the model could nearly find every kirby in the image, and may mistakenly mark some none-kirby character.
 
-`python3 -m pip install -r requirements.txt`
+## Web Deploy
 
-edit line 29 the `main.py` file to either the URL of the cocalc server you are on or `localhost` if you are running it on your own PC
+The web deploying part is refered to the [web templates of AI Camp](https://github.com/organization-x/omni), the CV branch specifically. You could find relative codes and files in [deploy](deploy). To test the deployed web, after installing all the dependencies in [requirements.txt](deploy/app/requirements.txt) (using `pip install -r requirements.txt`), run the [main.py](deploy/app/main.py) (`python3 -m main`). Then you should have a link like https://cocalc4.ai-camp.dev/49d42078-2ad9-44c6-bf76-70f193709a84/port/12345/. Finally, let's find Kirby in the images!!!
 
-Then, clone ultralytics yolov5 in the app folder, by running 
+![](image/home.PNG)
 
-`git clone https://github.com/ultralytics/yolov5`
-`pip install -r yolov5/requirements.txt`
+![](image/result.PNG)
 
-Run
+## Ensemble
 
- `python3 -m main`
+One of the most popular methods to upgrade model performance is model ensembling. As long as the base models are diverse and independent, the prediction error decreases when the ensemble approach is used. I use a state of art method for combining predictions of object detection models: [Weighted Box Fusion (WBF)](https://arxiv.org/abs/1910.13302). Introduced by Roman Solovyev et al. in 2019, the weighted box fusion (WBF) method uses confidence scores of all proposed bounding boxes to construct the average boxes. In this project, I trained yolov5s6 and yolov5m6 model, and use WBF method to ensemble their results. As shown in the following images, compared to the single model, the edge of the bounding box of the ensembling one are more close to Kirby. In addition, the weights of the base model are adjustable in this method, making it adaptable to different conditions.
 
-to start the server on local, most changes while developing will be picked up in realtime by the server
+![](image/wbf_result.PNG)
 
-### Quickstart Guide for Local Deployment
+## Future Work
+### Dataset Bias & Diversity
 
-Make sure docker is installed on your system. Look that up if you don't know what that means.
+When I collected data, I found that most of the video game screenshots are from the newest released Nitendo Switch Game - Kirby and the Forgotten Land. In this game, the resolution is relatively high compared to the previous version of Kirby. In this case, this dataset may have potential bias. Further, since most of the kirby are pink, being quite different from the surrouding game environment, so it would pretty easy for the model to simply find the pink area in the images. In this case, this object detection model have poor performance on pink background images. Besides, due to the time limitation, the dataset only contains 120+ images.
 
-cd into the root director of the repo then run 
+**Possible Solutions:** 
+1. Increase the number of images in the data;
+2. Enrich the diversity of the dataset: inlcude images (screenshots) from previous versions of games, add more images in pink background;
+3. If the number of images is truly limited on the Internet, we could also use networks like GAN to produce more images;
+4. Data Augmentation: We could write a yaml file to control this setting in YOLO.
 
-`docker build -t omni .`
+### Model Performance Improvement
+**Possible Solutions:** 
+1. Model Ensembling: NMS, soft-NMS, Weighted Box Fusion (DONE!), etc;
+2. Hyperparameter Tuning of YOLO architecture;
+3. Data Augmentation: Use different augmentation methods to improve the performance. I trained yolov5n6 and yolov5s6 in default mode.
 
-once built, run
+### Additional Functions
+#### Object Tracking
+We could add tracking algorithms to improve the overall performance of the system when it deals with streaming data, like a video game record. Tracking the agent in a streaming video would help in developing the game AI and the research of some AI and reinforcement learning algorithms.
 
-`docker run -d -p 9000:80 --restart=unless-stopped --name omni omni`
+**Possible Solutions:**
+Norfair Library: https://github.com/tryolabs/norfair. This is the object tracking library I once used in a kaggle project.
 
-you should then be able to see the `omni` container running when you run 
+#### Multiclass Detection
+We could also check the ability of the detected Kirby (sword, wind, frozen, fire, etc), all the enemies and bonus in the game. In this case, we could set a whole training environment for AI development simply by inputting video records, which should be a cool thing.
 
-`docker ps -a`
+**Possible Solutions:**
+While expanding the whole dataset, define more labels.
 
-if it seems to be stuck (i.e. constantly listed as `Restarting`), something is wrong with the docker image or code inside causing it to repeatedly fail.
 
-you can start debugging the project by running 
+## Acknowledgment
+I'd like to express my sincere gratitude to Alex Duffy and Mitch Cutts at AI Camp, who helped me patiently and promptly when I encountered difficulties in this project. Look forward to colaborating with all the members of AI Camp this summer!
 
-`docker logs -f omni` 
-
-or
-
-`docker exec -it omni /bin/bash` for an interactive bash terminal (this option only works if the container is running and not stuck in a restart loop)
-
-### Common Issues
-
-`$'\r': command not found` when attempting to start docker container
-
-this is caused by the the `entrypoint.sh` script somehow having CLRF line endings instead of LF line endings.
-
-to fix this run
-
-`sed -i 's/\r$//' entrypoint.sh`
-
-### File Structure
-The files/directories which you will need to edit are **bolded**
-
-**DO NOT TOUCH OTHER FILES. THIS MAY RESULT IN YOUR PROJECT BEING UNABLE TO RUN**
-
-- .gitignore
-- config.py
-- Dockerfile
-- READMD.md
-- entrypoint.sh
-- nginx_host
-- host_config
-- app/
-     - **main.py**
-     - **best.pt** <- you will need to upload this yourself after cloning the repo when developing the site
-     - **requirements.txt**
-     - **utils.py**
-     - templates/
-          - **index.html**
-
-### How to upload best.pt to your file structure?
-Run 
-`cp ../path/to/best.pt best.pt`
-### best.pt ###
-The weights file - must upload if you are running file on coding center or are trying to deploy.
-### main.py ###
-Contains the main flask app itself.
-### requirements.txt ###
-Contains list of packages and modules required to run the flask app. Edit only if you are using additional packages that need to be pip installed in order to run the project.
-
-To generate a requirements.txt file you can run
-
-`pip list --format=freeze > app/requirements.txt`
-
-the requirements.txt file will then be updated. Keep in mind: some packages you install on one operating system may not be available on another. You will have to debug and resolve this yourself if this is the case.
-### static/ ###
-Contains the static images, CSS, & JS files used by the flask app for the webpage. You will need to create this and put files in it. Place all your images used for your website in static/images/ so that you can then reference them in your html files.
-### utils.py ###
-Contains common functions used by the flask app. Put things here that are used more than once in the flask app.
-### templates/ ###
-Contains the HTML pages used for the webpage. Edit these to fit your project. index.html is the demo page.
-### Files used for deployment ###
-`config.py`
-`Dockerfile`
-`entrypoint.sh`
-`nginx_host`
-`host_config`
-**Only modify `host_config`. Do not touch the other files.**
+## Reference
+1. YOLOv5 Document: https://github.com/ultralytics/yolov5
+2. AI Camp Web Templates: https://github.com/organization-x/omni/tree/main/app
+3. Roboflow: https://roboflow.com/
+4. Solovyev, Roman, Weimin Wang, and Tatiana Gabruseva. "Weighted boxes fusion: Ensembling boxes from different object detection models." Image and Vision Computing 107 (2021): 104117. https://arxiv.org/abs/1910.13302
+5. Weighted Box Fusion, https://github.com/ZFTurbo/Weighted-Boxes-Fusion
+6. Norfair: https://github.com/tryolabs/norfair

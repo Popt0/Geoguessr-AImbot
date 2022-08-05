@@ -4,7 +4,7 @@ This project is implemented for AI Camp Summer Computer Vision. The **minimum vi
 
 ## Dataset
 We downloaded Youtube videos of people playing Geogussr and extracted image frames once every thirty seconds. The images that contain signs, electricity poles, or bollards were kept and labeled using [roboflow](https://roboflow.com/) by everyone on the team. Our country specific datasets were created using Google street view API, where we gathered random urban and suburban location street view images and went through the same process on Roboflow. 
-You could find the data used for training, validation and testing in [data](data) directory. Our dataset contains xxx images. 
+You could find the data used for training, validation and testing in data directory. Our dataset contains roughly 5000 images. 
 
 ## Model Training
 We used Kaggle notebooks accelerated with GPUs to train each of our models. The base model was trained with YOLOv5 while the three accessory models were trained in Resnet18. The primary augmentations we used were brightness, saturation, contrast, and hue.
@@ -23,3 +23,4 @@ One of our challenges was overfitting the ResNets. This was mostly due to time l
 1. YOLOv5 Document: https://github.com/ultralytics/yolov5
 2. AI Camp Web Templates: https://github.com/organization-x/omni/tree/main/app
 3. Roboflow: https://roboflow.com/
+4. Google Street View API: https://developers.google.com/maps

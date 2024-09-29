@@ -24,3 +24,6 @@ One of our challenges was overfitting the ResNets. This was mostly due to time l
 2. AI Camp Web Templates: https://github.com/organization-x/omni/tree/main/app
 3. Roboflow: https://roboflow.com/
 4. Google Street View API: https://developers.google.com/maps
+
+## Demo
+https://www.youtube.com/watch?v=mY_FjQqvUBw
